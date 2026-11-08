@@ -1,0 +1,290 @@
+{
+  "name": "MiniKitchen Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "minikitchen-chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [220, 300],
+      "webhookId": "minikitchen-chat"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "session-id",
+              "name": "sessionId",
+              "value": "={{ $json.body.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "user-msg",
+              "name": "userMessage",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-fields",
+      "name": "Extract Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1.5-flash",
+        "options": {
+          "systemMessage": "You are the helpful assistant for MiniKitchen, a restaurant in Negombo, Sri Lanka.\n\nRestaurant info:\n- Hours: Mon–Sun 11:00 AM – 10:00 PM\n- Phone: +94 77 123 4567\n- Email: hello@minikitchen.example\n- Address: 12 Beach Road, Negombo\n\nYou can help customers with:\n1. Answering questions about the menu, hours, and contact details.\n2. Taking table reservations. To book a table you need: full name, phone or email, date (YYYY-MM-DD), time, and number of guests (1–20).\n\nIMPORTANT RULES:\n- Never confirm a reservation yourself. Always say the reservation is PENDING and the restaurant will confirm.\n- When you have all 5 required fields (name, contact, date, time, guests), use the saveReservation tool to save it.\n- Keep responses short and friendly.\n- If asked about menu items you don't know, say you're not sure and suggest they call or visit."
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1.5-flash"
+      },
+      "id": "gemini-model",
+      "name": "Gemini Flash",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [580, 500]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Extract Fields').item.json.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "id": "memory",
+      "name": "Window Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [740, 500]
+    },
+    {
+      "parameters": {
+        "name": "saveReservation",
+        "description": "Save a table reservation. Call this tool only once you have collected all required details from the customer: name (full name), contact (phone or email), date (YYYY-MM-DD format), time (HH:MM format), and guests (number of guests, integer 1-20). The reservation is always saved as Pending — never Confirmed.",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $workflow.id }}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('name', 'The customer full name', 'string') }}",
+            "contact": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('contact', 'Phone number or email address', 'string') }}",
+            "date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('date', 'Reservation date in YYYY-MM-DD format', 'string') }}",
+            "time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('time', 'Reservation time in HH:MM format', 'string') }}",
+            "guests": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('guests', 'Number of guests (integer between 1 and 20)', 'number') }}"
+          },
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "contact",
+              "displayName": "contact",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "guests",
+              "displayName": "guests",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      },
+      "id": "save-reservation-tool",
+      "name": "Save Reservation Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.MINIKITCHEN_API_URL }}/api/chat-reservations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "name": "contact",
+              "value": "={{ $json.contact }}"
+            },
+            {
+              "name": "date",
+              "value": "={{ $json.date }}"
+            },
+            {
+              "name": "time",
+              "value": "={{ $json.time }}"
+            },
+            {
+              "name": "guests",
+              "value": "={{ $json.guests }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-save-reservation",
+      "name": "POST to MiniKitchen API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ reply: $('AI Agent').item.json.output }) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Reservation Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-11-08T00:00:00.000Z",
+  "versionId": "1"
+}
