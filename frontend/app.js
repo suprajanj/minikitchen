@@ -64,7 +64,7 @@ const FALLBACK_IMAGE_SVG = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
 `);
 
 function getMenuItemImage(item) {
-  if (item.image_url && typeof item.image_url === 'string' && item.image_url.trim().startsWith('http')) {
+  if (item.image_url && typeof item.image_url === 'string' && item.image_url.trim().length > 5) {
     return item.image_url.trim();
   }
   const text = `${item.name || ''} ${item.category || ''} ${item.description || ''}`.toLowerCase();
@@ -100,7 +100,7 @@ let activeCategory = 'all';
 async function loadMenu() {
   const container = $('#menu-list');
   try {
-    const res = await fetch('/api/menu');
+    const res = await fetch('/api/menu?t=' + Date.now());
     if (!res.ok) throw new Error('Bad response from server');
     allMenuItems = await res.json();
 

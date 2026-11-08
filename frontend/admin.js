@@ -30,7 +30,7 @@ const FALLBACK_SVG = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
 `);
 
 function getMenuItemImage(item) {
-  if (item.image_url && typeof item.image_url === 'string' && item.image_url.trim().startsWith('http')) {
+  if (item.image_url && typeof item.image_url === 'string' && item.image_url.trim().length > 5) {
     return item.image_url.trim();
   }
   const text = `${item.name || ''} ${item.category || ''} ${item.description || ''}`.toLowerCase();
@@ -224,7 +224,7 @@ async function loadMenuAdmin() {
   const wrap = $('#menu-admin-list');
   wrap.innerHTML = '<p class="muted">Loading dishes…</p>';
   try {
-    const r = await fetch('/api/menu');
+    const r = await fetch('/api/menu?t=' + Date.now());
     if (!r.ok) throw new Error();
     menuItems = await r.json();
     renderMenuAdmin();
@@ -424,7 +424,8 @@ function buildEditForm(item, card, onDone) {
         body: JSON.stringify(changes),
       });
       if (!r.ok) throw new Error();
-      Object.assign(item, changes);
+      const updated = await r.json();
+      Object.assign(item, updated);
       const newCard = buildMenuAdminCard(item);
       card.replaceWith(newCard);
       onDone();

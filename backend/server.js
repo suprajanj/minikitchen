@@ -4,6 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
@@ -14,6 +15,40 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SECRET_KEY
 );
+
+// Fallback persistent image storage (in case image_url column has not been added to Supabase yet)
+const MENU_IMAGES_FILE = path.join(__dirname, 'menu_images.json');
+
+function getLocalImages() {
+  try {
+    if (fs.existsSync(MENU_IMAGES_FILE)) {
+      return JSON.parse(fs.readFileSync(MENU_IMAGES_FILE, 'utf8'));
+    }
+  } catch {}
+  return {};
+}
+
+function saveLocalImage(id, url) {
+  try {
+    const map = getLocalImages();
+    if (url && typeof url === 'string' && url.trim()) {
+      map[String(id)] = url.trim();
+    } else {
+      delete map[String(id)];
+    }
+    fs.writeFileSync(MENU_IMAGES_FILE, JSON.stringify(map, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save local image mapping:', err);
+  }
+}
+
+function deleteLocalImage(id) {
+  try {
+    const map = getLocalImages();
+    delete map[String(id)];
+    fs.writeFileSync(MENU_IMAGES_FILE, JSON.stringify(map, null, 2), 'utf8');
+  } catch {}
+}
 
 // ---------- Helpers ----------
 function adminOnly(req, res, next) {
@@ -69,13 +104,21 @@ app.get('/api/info', (req, res) => {
 });
 
 app.get('/api/menu', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   const { data, error } = await supabase
     .from('menu_items')
     .select('*')
     .order('category')
     .order('name');
   if (error) return res.status(500).json({ error: 'Could not load menu' });
-  res.json(data);
+
+  const localImages = getLocalImages();
+  const enriched = (data || []).map((item) => ({
+    ...item,
+    image_url: item.image_url || localImages[String(item.id)] || null,
+  }));
+
+  res.json(enriched);
 });
 
 app.post('/api/reservations', async (req, res) => {
@@ -160,8 +203,9 @@ app.post('/api/admin/menu', adminOnly, async (req, res) => {
     available: available !== false,
   };
 
-  if (image_url && typeof image_url === 'string' && image_url.trim()) {
-    payload.image_url = image_url.trim();
+  const cleanImageUrl = image_url && typeof image_url === 'string' && image_url.trim() ? image_url.trim() : null;
+  if (cleanImageUrl) {
+    payload.image_url = cleanImageUrl;
   }
 
   let result = await supabase.from('menu_items').insert(payload).select().single();
@@ -173,7 +217,18 @@ app.post('/api/admin/menu', adminOnly, async (req, res) => {
   }
 
   if (result.error) return res.status(400).json({ error: result.error.message || 'Could not add item' });
-  res.status(201).json(result.data);
+
+  // Save to persistent local image mapping so it is always served
+  if (cleanImageUrl && result.data && result.data.id) {
+    saveLocalImage(result.data.id, cleanImageUrl);
+  }
+
+  const responseData = {
+    ...result.data,
+    image_url: cleanImageUrl || result.data.image_url || null,
+  };
+
+  res.status(201).json(responseData);
 });
 
 app.patch('/api/admin/menu/:id', adminOnly, async (req, res) => {
@@ -182,6 +237,10 @@ app.patch('/api/admin/menu/:id', adminOnly, async (req, res) => {
   for (const key of allowed) {
     if (req.body[key] !== undefined) changes[key] = req.body[key];
   }
+
+  const cleanImageUrl = changes.image_url !== undefined && typeof changes.image_url === 'string'
+    ? changes.image_url.trim()
+    : null;
 
   let result = await supabase
     .from('menu_items')
@@ -202,7 +261,19 @@ app.patch('/api/admin/menu/:id', adminOnly, async (req, res) => {
   }
 
   if (result.error) return res.status(400).json({ error: result.error.message || 'Could not update item' });
-  res.json(result.data);
+
+  // Update local image mapping
+  if (changes.image_url !== undefined) {
+    saveLocalImage(req.params.id, cleanImageUrl);
+  }
+
+  const localImages = getLocalImages();
+  const responseData = {
+    ...result.data,
+    image_url: result.data.image_url || cleanImageUrl || localImages[String(req.params.id)] || null,
+  };
+
+  res.json(responseData);
 });
 
 app.delete('/api/admin/menu/:id', adminOnly, async (req, res) => {
@@ -211,6 +282,7 @@ app.delete('/api/admin/menu/:id', adminOnly, async (req, res) => {
     .delete()
     .eq('id', req.params.id);
   if (error) return res.status(400).json({ error: error.message || 'Could not delete item' });
+  deleteLocalImage(req.params.id);
   res.json({ ok: true });
 });
 
