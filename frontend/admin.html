@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — MiniKitchen</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- Login screen -->
+  <div id="login-screen" class="login-wrap">
+    <div class="login-box">
+      <div class="login-logo">MiniKitchen</div>
+      <h1>Admin login</h1>
+      <form id="login-form" class="form" style="grid-template-columns:1fr;">
+        <label>Username
+          <input type="text" id="login-user" autocomplete="username" required>
+        </label>
+        <label>Password
+          <input type="password" id="login-pass" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="btn primary" style="justify-self:stretch;">Sign in</button>
+      </form>
+      <p id="login-err" class="form-message bad" style="display:none;"></p>
+    </div>
+  </div>
+
+  <!-- Dashboard (hidden until logged in) -->
+  <div id="dashboard" style="display:none;">
+    <header class="nav">
+      <div class="container nav-inner">
+        <span class="logo">MiniKitchen Admin</span>
+        <nav>
+          <a href="#reservations">Reservations</a>
+          <a href="#menu-mgmt">Menu</a>
+          <button id="logout-btn" class="btn" style="margin-left:16px;padding:7px 18px;font-size:.9rem;">Log out</button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Reservations section -->
+    <section id="reservations" class="section">
+      <div class="container">
+        <div class="section-head">
+          <h2>Reservations</h2>
+          <div class="filter-row">
+            <label>Filter:
+              <select id="status-filter">
+                <option value="">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div id="reservations-table-wrap">
+          <p class="muted">Loading reservations…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Menu management section -->
+    <section id="menu-mgmt" class="section alt">
+      <div class="container">
+        <h2>Menu items</h2>
+
+        <div class="admin-card">
+          <h3>Add new item</h3>
+          <form id="add-item-form" class="form">
+            <label>Name
+              <input type="text" name="name" required>
+            </label>
+            <label>Price (Rs.)
+              <input type="number" name="price" min="0" step="0.01" required>
+            </label>
+            <label>Category
+              <input type="text" name="category" placeholder="e.g. Mains">
+            </label>
+            <label>Description
+              <input type="text" name="description" placeholder="Short description">
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="available" checked> Available
+            </label>
+            <button type="submit" class="btn primary">Add item</button>
+          </form>
+          <p id="add-item-msg" class="form-message"></p>
+        </div>
+
+        <div id="menu-admin-list">
+          <p class="muted">Loading menu…</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
