@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MiniKitchen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="#home" class="logo">MiniKitchen</a>
+      <nav>
+        <a href="#menu">Menu</a>
+        <a href="#reserve">Reserve</a>
+        <a href="#contact">Contact</a>
+        <a href="admin.html" style="color:var(--muted);font-size:.85rem;">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <section id="home" class="hero">
+    <div class="container">
+      <h1>Fresh. Fast. Local.</h1>
+      <p>Home-style food made with love. Book a table or chat with our assistant any time.</p>
+      <a class="btn" href="#reserve">Book a table</a>
+    </div>
+  </section>
+
+  <section id="menu" class="section">
+    <div class="container">
+      <h2>Our Menu</h2>
+      <div id="menu-list">Loading menu...</div>
+    </div>
+  </section>
+
+  <section id="reserve" class="section alt">
+    <div class="container">
+      <h2>Reserve a Table</h2>
+      <p class="muted">Send us a request and we'll confirm it shortly.</p>
+      <form id="reservation-form" class="form">
+        <label>Name
+          <input type="text" name="name" required>
+        </label>
+        <label>Phone or email
+          <input type="text" name="contact" required>
+        </label>
+        <label>Date
+          <input type="date" name="date" id="date-input" required>
+        </label>
+        <label>Time
+          <input type="time" name="time" required>
+        </label>
+        <label>Guests
+          <input type="number" name="guests" min="1" max="20" value="2" required>
+        </label>
+        <button type="submit" class="btn primary">Request reservation</button>
+      </form>
+      <p id="form-message" class="form-message"></p>
+    </div>
+  </section>
+
+  <section id="contact" class="section">
+    <div class="container">
+      <h2>Opening Hours &amp; Contact</h2>
+      <div class="contact-grid">
+        <div><strong>Hours</strong><br><span id="info-hours">-</span></div>
+        <div><strong>Phone</strong><br><span id="info-phone">-</span></div>
+        <div><strong>Email</strong><br><span id="info-email">-</span></div>
+        <div><strong>Address</strong><br><span id="info-address">-</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">&copy; MiniKitchen. A fictional restaurant for an assessment project.</div>
+  </footer>
+
+  <!-- Chat widget -->
+  <button id="chat-toggle" class="chat-toggle" aria-label="Open chat">💬</button>
+  <div id="chat-panel" class="chat-panel">
+    <div class="chat-header">MiniKitchen Assistant</div>
+    <div id="chat-messages" class="chat-messages"></div>
+    <form id="chat-form" class="chat-form">
+      <input type="text" id="chat-input" placeholder="Ask about the menu or book a table..." autocomplete="off" required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
