@@ -3,88 +3,254 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MiniKitchen</title>
+  <title>MiniKitchen — Negombo Beach Road</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+  <!-- Navigation -->
   <header class="nav">
     <div class="container nav-inner">
-      <a href="#home" class="logo">MiniKitchen</a>
+      <a href="#home" class="logo">
+        <span class="logo-icon">🥘</span> MiniKitchen
+      </a>
       <nav>
         <a href="#menu">Menu</a>
         <a href="#reserve">Reserve</a>
+        <a href="#about">About</a>
         <a href="#contact">Contact</a>
-        <a href="admin.html" style="color:var(--muted);font-size:.85rem;">Admin</a>
+        <a href="admin.html" class="nav-admin" title="Restaurant Admin Portal">Admin</a>
       </nav>
     </div>
   </header>
 
+  <!-- Hero Section -->
   <section id="home" class="hero">
-    <div class="container">
-      <h1>Fresh. Fast. Local.</h1>
-      <p>Home-style food made with love. Book a table or chat with our assistant any time.</p>
-      <a class="btn" href="#reserve">Book a table</a>
-    </div>
-  </section>
-
-  <section id="menu" class="section">
-    <div class="container">
-      <h2>Our Menu</h2>
-      <div id="menu-list">Loading menu...</div>
-    </div>
-  </section>
-
-  <section id="reserve" class="section alt">
-    <div class="container">
-      <h2>Reserve a Table</h2>
-      <p class="muted">Send us a request and we'll confirm it shortly.</p>
-      <form id="reservation-form" class="form">
-        <label>Name
-          <input type="text" name="name" required>
-        </label>
-        <label>Phone or email
-          <input type="text" name="contact" required>
-        </label>
-        <label>Date
-          <input type="date" name="date" id="date-input" required>
-        </label>
-        <label>Time
-          <input type="time" name="time" required>
-        </label>
-        <label>Guests
-          <input type="number" name="guests" min="1" max="20" value="2" required>
-        </label>
-        <button type="submit" class="btn primary">Request reservation</button>
-      </form>
-      <p id="form-message" class="form-message"></p>
-    </div>
-  </section>
-
-  <section id="contact" class="section">
-    <div class="container">
-      <h2>Opening Hours &amp; Contact</h2>
-      <div class="contact-grid">
-        <div><strong>Hours</strong><br><span id="info-hours">-</span></div>
-        <div><strong>Phone</strong><br><span id="info-phone">-</span></div>
-        <div><strong>Email</strong><br><span id="info-email">-</span></div>
-        <div><strong>Address</strong><br><span id="info-address">-</span></div>
+    <div class="hero-overlay"></div>
+    <div class="container hero-content">
+      <div class="hero-badge">📍 12 Beach Road, Negombo &bull; Open Daily 11 AM – 10 PM</div>
+      <h1>Fresh. Fast. Authentic Coastal Flavors.</h1>
+      <p>From sizzling Lagoon Crab and Seafood Kottu to traditional clay-pot curries. Made with love and the day's freshest catch.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#reserve">Reserve a Table</a>
+        <a class="btn secondary" href="#menu">Explore Menu</a>
       </div>
     </div>
   </section>
 
+  <!-- Features Strip -->
+  <section class="features-bar">
+    <div class="container features-grid">
+      <div class="feature-item">
+        <span class="feature-icon">🦞</span>
+        <div>
+          <strong>Fresh Lagoon Catch</strong>
+          <small>Daily Negombo seafood</small>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🍲</span>
+        <div>
+          <strong>Homemade Spices</strong>
+          <small>Authentic Sri Lankan recipes</small>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">📅</span>
+        <div>
+          <strong>Fast Reservations</strong>
+          <small>Instant table request</small>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🤖</span>
+        <div>
+          <strong>AI Concierge</strong>
+          <small>Ask questions 24/7 in chat</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu Section -->
+  <section id="menu" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Chef's Specialties</span>
+        <h2>Our Menu</h2>
+        <p class="muted">Fresh ingredients prepared to order. Prices in Sri Lankan Rupees (Rs.).</p>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="category-tabs" id="category-tabs" aria-label="Menu categories">
+        <button class="cat-tab active" data-category="all">All Dishes</button>
+      </div>
+
+      <!-- Menu Grid -->
+      <div id="menu-list" class="menu-container">
+        <div class="menu-loading">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reservation Section -->
+  <section id="reserve" class="section alt">
+    <div class="container">
+      <div class="reserve-wrapper">
+        <div class="reserve-info">
+          <span class="section-tag">Dine With Us</span>
+          <h2>Book Your Table</h2>
+          <p>Whether it's a romantic sunset dinner, family gathering, or casual lunch, we'd love to host you.</p>
+          <ul class="reserve-perks">
+            <li>✨ Instant confirmation follow-up via phone or WhatsApp</li>
+            <li>🌅 Outdoor garden and air-conditioned indoor seating</li>
+            <li>🍷 Bring-your-own-wine friendly &amp; group bookings welcome</li>
+          </ul>
+          <div class="reserve-note-box">
+            <strong>💬 Want to book faster?</strong>
+            <p>Click the chat bubble at the bottom right to reserve directly with our AI assistant!</p>
+          </div>
+        </div>
+
+        <div class="reserve-card">
+          <form id="reservation-form" class="form">
+            <label>Full Name
+              <input type="text" name="name" placeholder="John Silva" required>
+            </label>
+            <label>Phone or Email
+              <input type="text" name="contact" placeholder="+94 77 020 2852" required>
+            </label>
+            <div class="form-row">
+              <label>Date
+                <input type="date" name="date" id="date-input" required>
+              </label>
+              <label>Time
+                <input type="time" name="time" id="time-input" value="19:30" required>
+              </label>
+            </div>
+            <label>Number of Guests (1–20)
+              <input type="number" name="guests" min="1" max="20" value="2" required>
+            </label>
+            <button type="submit" class="btn primary btn-block">Request Reservation</button>
+          </form>
+          <div id="form-message" class="form-message"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="section">
+    <div class="container about-grid">
+      <div class="about-image-wrap">
+        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80" alt="MiniKitchen restaurant interior" class="about-img" loading="lazy">
+        <div class="about-floating-card">
+          <strong>10+ Years</strong>
+          <span>Serving Negombo Beach Road</span>
+        </div>
+      </div>
+      <div class="about-text">
+        <span class="section-tag">Our Story</span>
+        <h2>Coastal Hospitality, Authentic Flavors</h2>
+        <p>MiniKitchen started as a small beachside kitchen with a passion for Negombo's vibrant culinary tradition. We source seafood directly from local Negombo lagoon fishermen every morning and grind our spices by hand.</p>
+        <p>Come for the fresh sea breeze, stay for the rich crab curry, sizzling kottu, and warm Sri Lankan smiles.</p>
+        <div class="about-badges">
+          <span>🌿 Vegetarian Options</span>
+          <span>🦀 Fresh Lagoon Catch</span>
+          <span>🍹 Tropical Fresh Juices</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="section alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Find Us</span>
+        <h2>Opening Hours &amp; Location</h2>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="contact-icon">🕒</div>
+          <h3>Opening Hours</h3>
+          <p id="info-hours">Mon–Sun 11:00 AM – 10:00 PM</p>
+          <small class="muted">Kitchen closes 9:30 PM</small>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon">📞</div>
+          <h3>Call Us</h3>
+          <p id="info-phone"><a href="tel:+94771234567">+94 77 123 4567</a></p>
+          <small class="muted">Reservations &amp; takeouts</small>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon">✉️</div>
+          <h3>Email</h3>
+          <p id="info-email"><a href="mailto:hello@minikitchen.example">hello@minikitchen.example</a></p>
+          <small class="muted">Private events &amp; inquiries</small>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon">📍</div>
+          <h3>Address</h3>
+          <p id="info-address">12 Beach Road, Negombo</p>
+          <small class="muted">2 mins walk from the beach</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
   <footer class="footer">
-    <div class="container">&copy; MiniKitchen. A fictional restaurant for an assessment project.</div>
+    <div class="container footer-inner">
+      <div>&copy; MiniKitchen Negombo. Fresh coastal cuisine.</div>
+      <div class="footer-links">
+        <a href="#menu">Menu</a>
+        <a href="#reserve">Reserve</a>
+        <a href="admin.html">Admin Portal</a>
+      </div>
+    </div>
   </footer>
 
   <!-- Chat widget -->
-  <button id="chat-toggle" class="chat-toggle" aria-label="Open chat">💬</button>
+  <button id="chat-toggle" class="chat-toggle" aria-label="Open chat assistant" title="Chat with MiniKitchen Assistant">
+    <span class="chat-toggle-icon">💬</span>
+    <span class="chat-toggle-close" style="display:none;">✕</span>
+    <span class="chat-pulse"></span>
+  </button>
+
   <div id="chat-panel" class="chat-panel">
-    <div class="chat-header">MiniKitchen Assistant</div>
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar">🧑‍🍳</div>
+        <div>
+          <div class="chat-title">MiniKitchen Concierge</div>
+          <div class="chat-status"><span class="status-dot"></span> Online &bull; Ready to help</div>
+        </div>
+      </div>
+      <button id="chat-close" class="chat-close-btn" aria-label="Close chat">✕</button>
+    </div>
+
     <div id="chat-messages" class="chat-messages"></div>
+
+    <!-- Quick action chips -->
+    <div class="chat-suggestions" id="chat-suggestions">
+      <button class="chip" data-msg="Can I book a table for 2 people tonight at 8 PM?">📅 Book for 2 tonight</button>
+      <button class="chip" data-msg="What are your seafood and curry specialties?">🦞 Seafood specials</button>
+      <button class="chip" data-msg="What are your opening hours and location?">🕒 Hours & location</button>
+    </div>
+
     <form id="chat-form" class="chat-form">
-      <input type="text" id="chat-input" placeholder="Ask about the menu or book a table..." autocomplete="off" required>
-      <button type="submit">Send</button>
+      <input type="text" id="chat-input" placeholder="Ask about menu, hours, or book a table..." autocomplete="off" required>
+      <button type="submit" aria-label="Send message">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
     </form>
   </div>
 

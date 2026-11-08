@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin — MiniKitchen</title>
+  <title>Admin Dashboard — MiniKitchen</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="admin.css">
 </head>
@@ -12,18 +12,26 @@
   <!-- Login screen -->
   <div id="login-screen" class="login-wrap">
     <div class="login-box">
-      <div class="login-logo">MiniKitchen</div>
-      <h1>Admin login</h1>
+      <div class="login-logo">
+        <span style="font-size:1.6rem;margin-right:6px;">🥘</span> MiniKitchen
+      </div>
+      <h1>Restaurant Admin</h1>
+      <p class="muted" style="margin-bottom:20px;font-size:0.92rem;">Sign in to manage table reservations and menu items.</p>
+
       <form id="login-form" class="form" style="grid-template-columns:1fr;">
         <label>Username
-          <input type="text" id="login-user" autocomplete="username" required>
+          <input type="text" id="login-user" autocomplete="username" placeholder="e.g. admin" required>
         </label>
         <label>Password
-          <input type="password" id="login-pass" autocomplete="current-password" required>
+          <input type="password" id="login-pass" autocomplete="current-password" placeholder="••••••••" required>
         </label>
-        <button type="submit" class="btn primary" style="justify-self:stretch;">Sign in</button>
+        <button type="submit" class="btn primary" style="justify-self:stretch;margin-top:8px;">Sign In to Dashboard</button>
       </form>
       <p id="login-err" class="form-message bad" style="display:none;"></p>
+
+      <div style="margin-top:24px;text-align:center;font-size:0.85rem;color:var(--muted);">
+        <a href="/" style="color:var(--brand);font-weight:600;">&larr; Back to Public Restaurant Site</a>
+      </div>
     </div>
   </div>
 
@@ -31,11 +39,14 @@
   <div id="dashboard" style="display:none;">
     <header class="nav">
       <div class="container nav-inner">
-        <span class="logo">MiniKitchen Admin</span>
-        <nav>
+        <span class="logo">
+          <span style="font-size:1.4rem;">🥘</span> MiniKitchen Admin
+        </span>
+        <nav style="display:flex;align-items:center;gap:18px;">
           <a href="#reservations">Reservations</a>
-          <a href="#menu-mgmt">Menu</a>
-          <button id="logout-btn" class="btn" style="margin-left:16px;padding:7px 18px;font-size:.9rem;">Log out</button>
+          <a href="#menu-mgmt">Menu Management</a>
+          <a href="/" target="_blank" style="color:var(--brand);font-weight:600;font-size:.9rem;">View Site ↗</a>
+          <button id="logout-btn" class="btn secondary" style="padding:7px 18px;font-size:.85rem;">Log Out</button>
         </nav>
       </div>
     </header>
@@ -44,14 +55,17 @@
     <section id="reservations" class="section">
       <div class="container">
         <div class="section-head">
-          <h2>Reservations</h2>
+          <div>
+            <span class="section-tag">Booking Requests</span>
+            <h2>Reservations</h2>
+          </div>
           <div class="filter-row">
-            <label>Filter:
+            <label>Filter by status:
               <select id="status-filter">
-                <option value="">All</option>
-                <option value="Pending">Pending</option>
-                <option value="Confirmed">Confirmed</option>
-                <option value="Cancelled">Cancelled</option>
+                <option value="">All Reservations</option>
+                <option value="Pending">Pending Only</option>
+                <option value="Confirmed">Confirmed Only</option>
+                <option value="Cancelled">Cancelled Only</option>
               </select>
             </label>
           </div>
@@ -65,31 +79,71 @@
     <!-- Menu management section -->
     <section id="menu-mgmt" class="section alt">
       <div class="container">
-        <h2>Menu items</h2>
+        <div class="section-head">
+          <div>
+            <span class="section-tag">Dishes &amp; Offerings</span>
+            <h2>Menu Management</h2>
+          </div>
+        </div>
 
+        <!-- Add item card -->
         <div class="admin-card">
-          <h3>Add new item</h3>
+          <h3>➕ Add New Menu Item</h3>
           <form id="add-item-form" class="form">
-            <label>Name
-              <input type="text" name="name" required>
-            </label>
-            <label>Price (Rs.)
-              <input type="number" name="price" min="0" step="0.01" required>
-            </label>
-            <label>Category
-              <input type="text" name="category" placeholder="e.g. Mains">
-            </label>
+            <div class="form-grid-2">
+              <label>Dish Name
+                <input type="text" name="name" id="new-item-name" placeholder="e.g. Negombo Lagoon Crab Curry" required>
+              </label>
+              <label>Price (Rs.)
+                <input type="number" name="price" min="0" step="0.01" placeholder="e.g. 2400" required>
+              </label>
+            </div>
+
+            <div class="form-grid-2">
+              <label>Category
+                <input type="text" name="category" id="new-item-category" placeholder="e.g. Seafood, Mains, Kottu, Curries, Desserts">
+              </label>
+              <label>Photo URL (Optional)
+                <input type="url" name="image_url" id="new-item-image" placeholder="https://images.unsplash.com/...">
+              </label>
+            </div>
+
+            <!-- Preset Buttons -->
+            <div class="preset-row">
+              <span class="preset-label">Quick Photo Presets:</span>
+              <div class="preset-chips">
+                <button type="button" class="preset-btn" data-cat="Seafood" data-img="https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=700&q=85">🦀 Lagoon Crab</button>
+                <button type="button" class="preset-btn" data-cat="Kottu" data-img="https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=700&q=85">🍗 Chicken Kottu</button>
+                <button type="button" class="preset-btn" data-cat="Curries" data-img="https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=700&q=85">🍛 Fish Curry</button>
+                <button type="button" class="preset-btn" data-cat="Mains" data-img="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=700&q=85">🍚 Rice &amp; Biryani</button>
+                <button type="button" class="preset-btn" data-cat="Seafood" data-img="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=700&q=85">🦑 Hot Butter Cuttlefish</button>
+                <button type="button" class="preset-btn" data-cat="Starters" data-img="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=700&q=85">🥞 Egg Hoppers / Roti</button>
+                <button type="button" class="preset-btn" data-cat="Beverages" data-img="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=700&q=85">🍹 Lime Soda &amp; Juice</button>
+                <button type="button" class="preset-btn" data-cat="Desserts" data-img="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=700&q=85">🍮 Watalappam / Pudding</button>
+              </div>
+            </div>
+
+            <!-- Image Live Preview -->
+            <div id="add-item-preview-wrap" class="image-preview-wrap" style="display:none;">
+              <span class="preview-title">Photo Preview:</span>
+              <img id="add-item-preview" src="" alt="Photo preview" class="admin-preview-img">
+            </div>
+
             <label>Description
-              <input type="text" name="description" placeholder="Short description">
+              <input type="text" name="description" placeholder="Fresh lagoon crab cooked in rich Negombo coconut spices.">
             </label>
+
             <label class="checkbox-label">
-              <input type="checkbox" name="available" checked> Available
+              <input type="checkbox" name="available" checked> Available to order immediately
             </label>
-            <button type="submit" class="btn primary">Add item</button>
+
+            <button type="submit" class="btn primary" style="align-self:flex-start;">Add Dish to Menu</button>
           </form>
           <p id="add-item-msg" class="form-message"></p>
         </div>
 
+        <!-- Current items list -->
+        <h3 style="margin-bottom:16px;">Current Menu Items</h3>
         <div id="menu-admin-list">
           <p class="muted">Loading menu…</p>
         </div>
@@ -100,4 +154,3 @@
   <script src="admin.js"></script>
 </body>
 </html>
-
