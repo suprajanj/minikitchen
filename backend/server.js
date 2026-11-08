@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -165,6 +165,24 @@ app.patch('/api/admin/menu/:id', adminOnly, async (req, res) => {
     .single();
   if (error) return res.status(400).json({ error: 'Could not update item' });
   res.json(data);
+});
+
+// ---------- Chat (forwards to n8n) ----------
+app.post('/api/chat', async (req, res) => {
+  if (!process.env.N8N_WEBHOOK_URL) {
+    return res.json({ reply: 'The assistant is not connected yet. Please use the reservation form.' });
+  }
+  try {
+    const r = await fetch(process.env.N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: req.body.sessionId, message: req.body.message }),
+    });
+    const data = await r.json();
+    res.json({ reply: data.reply || data.output || 'Sorry, I could not answer that.' });
+  } catch {
+    res.status(502).json({ reply: 'Sorry, the assistant is unavailable right now.' });
+  }
 });
 
 // ---------- Start ----------
