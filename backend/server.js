@@ -241,6 +241,7 @@ app.patch('/api/admin/menu/:id', adminOnly, async (req, res) => {
   const cleanImageUrl = changes.image_url !== undefined && typeof changes.image_url === 'string'
     ? changes.image_url.trim()
     : null;
+  const hadImageUrlChange = changes.image_url !== undefined;
 
   let result = await supabase
     .from('menu_items')
@@ -263,7 +264,7 @@ app.patch('/api/admin/menu/:id', adminOnly, async (req, res) => {
   if (result.error) return res.status(400).json({ error: result.error.message || 'Could not update item' });
 
   // Update local image mapping
-  if (changes.image_url !== undefined) {
+  if (hadImageUrlChange) {
     saveLocalImage(req.params.id, cleanImageUrl);
   }
 
