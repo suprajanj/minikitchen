@@ -1,31 +1,38 @@
+/**
+ * MINIKITCHEN — EXECUTIVE HOSPITALITY MANAGEMENT CONTROLLER
+ * Handles administrator authentication, operational metrics calculation,
+ * real-time guest ledger management, and gastronomy collection administration.
+ */
+
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
-// Food image preset dictionary
+// Curated Michelin / Luxury Hotel food photography library
 const FOOD_IMAGES = {
-  crab: 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=700&q=85',
-  prawn: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=700&q=85',
-  cuttlefish: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=700&q=85',
-  squid: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=700&q=85',
-  fish: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=700&q=85',
-  seafood: 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=700&q=85',
-  kottu: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=700&q=85',
-  roti: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=700&q=85',
-  hopper: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=700&q=85',
-  curry: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=700&q=85',
-  rice: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=700&q=85',
-  biryani: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=700&q=85',
-  chicken: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=700&q=85',
-  dessert: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=700&q=85',
-  juice: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=700&q=85',
-  default: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=700&q=85',
+  crab: 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=900&q=88',
+  prawn: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=900&q=88',
+  cuttlefish: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=900&q=88',
+  squid: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=900&q=88',
+  fish: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=900&q=88',
+  seafood: 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=900&q=88',
+  kottu: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=900&q=88',
+  roti: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=900&q=88',
+  hopper: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=88',
+  curry: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=900&q=88',
+  rice: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=900&q=88',
+  biryani: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=900&q=88',
+  chicken: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=900&q=88',
+  dessert: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=900&q=88',
+  juice: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=88',
+  default: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=88',
 };
 
-const FALLBACK_SVG = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240">
-  <rect width="400" height="240" fill="#fcf4eb"/>
-  <text x="200" y="115" font-size="36" text-anchor="middle">🥘</text>
-  <text x="200" y="165" font-family="-apple-system, sans-serif" font-size="14" font-weight="700" fill="#d9480f" text-anchor="middle">MiniKitchen Dish</text>
+const LUXURY_FALLBACK_SVG = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="380" viewBox="0 0 600 380">
+  <rect width="600" height="380" fill="#0f2420"/>
+  <circle cx="300" cy="170" r="70" fill="none" stroke="#c5a880" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="300" y="178" font-family="Georgia, serif" font-size="28" fill="#c5a880" text-anchor="middle">⚜</text>
+  <text x="300" y="270" font-family="-apple-system, sans-serif" font-size="12" letter-spacing="4" font-weight="600" fill="#dfcaa7" text-anchor="middle">MINIKITCHEN SANCTUARY</text>
 </svg>
 `);
 
@@ -42,7 +49,7 @@ function getMenuItemImage(item) {
   return FOOD_IMAGES.default;
 }
 
-// ---------- Auth state ----------
+// ---------- Authentication State & Bootstrap ----------
 let authed = false;
 
 async function checkAuth() {
@@ -56,7 +63,7 @@ async function checkAuth() {
 function showDashboard() {
   authed = true;
   $('#login-screen').style.display = 'none';
-  $('#dashboard').style.display = '';
+  $('#dashboard').style.display = 'block';
   loadReservations();
   loadMenuAdmin();
 }
@@ -64,22 +71,24 @@ function showDashboard() {
 function showLogin() {
   authed = false;
   $('#dashboard').style.display = 'none';
-  $('#login-screen').style.display = '';
+  $('#login-screen').style.display = 'flex';
 }
 
-// ---------- Bootstrap ----------
 (async () => {
   if (await checkAuth()) {
     showDashboard();
+  } else {
+    showLogin();
   }
 })();
 
-// ---------- Login ----------
+// ---------- Login Submission ----------
 $('#login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const btn = e.target.querySelector('button');
+  const btn = e.target.querySelector('button[type="submit"]');
   const err = $('#login-err');
   btn.disabled = true;
+  btn.textContent = 'Authenticating…';
   err.style.display = 'none';
 
   try {
@@ -92,16 +101,17 @@ $('#login-form').addEventListener('submit', async (e) => {
       }),
     });
     const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Login failed');
+    if (!r.ok) throw new Error(data.error || 'Authentication rejected');
     if (data.token) {
       sessionStorage.setItem('admin_jwt', data.token);
     }
     showDashboard();
   } catch (ex) {
     err.textContent = ex.message;
-    err.style.display = '';
+    err.style.display = 'block';
   } finally {
     btn.disabled = false;
+    btn.textContent = 'Authenticate Access';
   }
 });
 
@@ -112,46 +122,92 @@ $('#logout-btn').addEventListener('click', async () => {
   showLogin();
 });
 
-// ---------- Reservations ----------
+// ---------- State & Operational Metrics ----------
 let allReservations = [];
+let menuItems = [];
 
+function updateMetrics() {
+  const total = allReservations.length;
+  const pending = allReservations.filter((r) => r.status === 'Pending').length;
+  const confirmed = allReservations.filter((r) => r.status === 'Confirmed').length;
+
+  const todayStr = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const todayReservations = allReservations.filter((r) => r.date === todayStr && r.status !== 'Cancelled');
+  const todayCovers = todayReservations.reduce((acc, r) => acc + (Number(r.guests) || 0), 0);
+
+  const activeDishes = menuItems.filter((m) => m.available).length;
+
+  if ($('#metric-total')) $('#metric-total').textContent = total;
+  if ($('#metric-pending')) $('#metric-pending').textContent = pending;
+  if ($('#metric-confirmed')) $('#metric-confirmed').textContent = confirmed;
+  if ($('#metric-today')) $('#metric-today').textContent = `${todayCovers} (${todayReservations.length})`;
+  if ($('#metric-today-date')) $('#metric-today-date').textContent = `${todayStr} • active covers`;
+  if ($('#metric-menu')) $('#metric-menu').textContent = menuItems.length;
+  if ($('#metric-menu-avail')) $('#metric-menu-avail').textContent = `${activeDishes} currently available`;
+}
+
+// ---------- Reservations Ledger ----------
 async function loadReservations() {
   const wrap = $('#reservations-table-wrap');
-  wrap.innerHTML = '<p class="muted">Loading reservations…</p>';
+  wrap.innerHTML = '<p class="muted" style="padding:28px 20px;">Retrieving guest ledger from database…</p>';
   try {
     const r = await fetch('/api/admin/reservations');
     if (!r.ok) throw new Error();
     allReservations = await r.json();
     renderReservations();
+    updateMetrics();
   } catch {
-    wrap.innerHTML = '<p class="form-message bad" style="display:block;">Could not load reservations.</p>';
+    wrap.innerHTML = '<p class="admin-alert error" style="margin:20px;">Could not retrieve guest reservations ledger.</p>';
   }
 }
 
 function renderReservations() {
-  const filter = $('#status-filter').value;
-  const list = filter ? allReservations.filter((r) => r.status === filter) : allReservations;
+  const statusFilter = $('#status-filter') ? $('#status-filter').value : '';
+  const dateFilter = $('#date-filter') ? $('#date-filter').value : '';
+  const searchFilter = $('#search-input') ? $('#search-input').value.trim().toLowerCase() : '';
   const wrap = $('#reservations-table-wrap');
 
+  let list = allReservations;
+
+  if (statusFilter) {
+    list = list.filter((r) => r.status === statusFilter);
+  }
+  if (dateFilter) {
+    list = list.filter((r) => r.date === dateFilter);
+  }
+  if (searchFilter) {
+    list = list.filter((r) => {
+      const name = (r.name || '').toLowerCase();
+      const contact = (r.contact || '').toLowerCase();
+      const id = String(r.id || '');
+      return name.includes(searchFilter) || contact.includes(searchFilter) || id.includes(searchFilter);
+    });
+  }
+
   if (list.length === 0) {
-    wrap.innerHTML = '<p class="muted" style="padding:24px 0;">No reservations match the selected filter.</p>';
+    wrap.innerHTML = `
+      <div style="padding:48px 20px;text-align:center;">
+        <p class="font-serif" style="font-size:1.4rem;color:var(--color-primary);margin-bottom:6px;">No reservations found</p>
+        <p class="muted" style="font-size:0.9rem;">No guest records match your search or filter criteria.</p>
+      </div>
+    `;
     return;
   }
 
   const table = document.createElement('table');
-  table.className = 'res-table';
+  table.className = 'admin-ledger-table';
   table.innerHTML = `
     <thead>
       <tr>
-        <th>#</th>
-        <th>Customer Name</th>
-        <th>Contact Info</th>
+        <th>ID</th>
+        <th>Guest Name</th>
+        <th>Contact Information</th>
         <th>Date</th>
         <th>Time</th>
-        <th>Guests</th>
+        <th>Covers</th>
         <th>Channel</th>
         <th>Status</th>
-        <th>Action</th>
+        <th>Review Action</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -164,20 +220,20 @@ function renderReservations() {
     const timeStr = res.time ? res.time.slice(0, 5) : '—';
 
     tr.innerHTML = `
-      <td><strong>#${res.id}</strong></td>
+      <td><span style="font-family:monospace;font-weight:700;color:var(--color-gold-dark);">#${res.id}</span></td>
       <td><strong>${escHtml(res.name)}</strong></td>
       <td>${escHtml(res.contact)}</td>
       <td>${escHtml(dateStr)}</td>
       <td>${escHtml(timeStr)}</td>
       <td><strong>${res.guests}</strong></td>
-      <td><span class="source-badge">${escHtml(res.source || 'web')}</span></td>
-      <td><span class="status-badge ${escHtml(res.status)}">${escHtml(res.status)}</span></td>
+      <td><span class="source-tag">${escHtml(res.source || 'web')}</span></td>
+      <td><span class="status-pill ${escHtml(res.status)}">${escHtml(res.status)}</span></td>
       <td></td>
     `;
 
-    // Status change select dropdown
+    // Status updater dropdown
     const sel = document.createElement('select');
-    sel.className = 'action-select';
+    sel.className = 'status-action-select';
     ['Pending', 'Confirmed', 'Cancelled'].forEach((s) => {
       const opt = document.createElement('option');
       opt.value = s;
@@ -188,20 +244,23 @@ function renderReservations() {
 
     sel.addEventListener('change', async () => {
       sel.disabled = true;
+      const oldStatus = res.status;
+      const newStatus = sel.value;
       try {
         const rr = await fetch(`/api/admin/reservations/${res.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: sel.value }),
+          body: JSON.stringify({ status: newStatus }),
         });
         if (!rr.ok) throw new Error();
-        res.status = sel.value;
-        const badge = tr.querySelector('.status-badge');
-        badge.className = `status-badge ${res.status}`;
-        badge.textContent = res.status;
+        res.status = newStatus;
+        const badge = tr.querySelector('.status-pill');
+        badge.className = `status-pill ${newStatus}`;
+        badge.textContent = newStatus;
+        updateMetrics();
       } catch {
-        alert('Could not update status. Please try again.');
-        sel.value = res.status;
+        alert('Could not update reservation status. Please try again.');
+        sel.value = oldStatus;
       } finally {
         sel.disabled = false;
       }
@@ -215,95 +274,111 @@ function renderReservations() {
   wrap.appendChild(table);
 }
 
-$('#status-filter').addEventListener('change', renderReservations);
+// Filter Listeners
+if ($('#status-filter')) $('#status-filter').addEventListener('change', renderReservations);
+if ($('#date-filter')) $('#date-filter').addEventListener('input', renderReservations);
+if ($('#search-input')) $('#search-input').addEventListener('input', renderReservations);
+if ($('#reset-filters-btn')) {
+  $('#reset-filters-btn').addEventListener('click', () => {
+    if ($('#status-filter')) $('#status-filter').value = '';
+    if ($('#date-filter')) $('#date-filter').value = '';
+    if ($('#search-input')) $('#search-input').value = '';
+    renderReservations();
+  });
+}
 
-// ---------- Menu admin ----------
-let menuItems = [];
-
+// ---------- Gastronomy Collection Admin ----------
 async function loadMenuAdmin() {
   const wrap = $('#menu-admin-list');
-  wrap.innerHTML = '<p class="muted">Loading dishes…</p>';
+  wrap.innerHTML = '<p class="muted" style="padding:24px 0;">Loading gastronomy offerings…</p>';
   try {
     const r = await fetch('/api/menu?t=' + Date.now());
     if (!r.ok) throw new Error();
     menuItems = await r.json();
     renderMenuAdmin();
+    updateMetrics();
   } catch {
-    wrap.innerHTML = '<p class="form-message bad" style="display:block;">Could not load menu items.</p>';
+    wrap.innerHTML = '<p class="admin-alert error">Could not load gastronomy collection items.</p>';
   }
 }
 
 function renderMenuAdmin() {
   const wrap = $('#menu-admin-list');
   if (menuItems.length === 0) {
-    wrap.innerHTML = '<p class="muted">No dishes on the menu yet. Add your first dish above!</p>';
+    wrap.innerHTML = `
+      <div style="padding:36px;text-align:center;">
+        <p class="font-serif" style="font-size:1.3rem;">No offerings published yet.</p>
+        <p class="muted">Add your first fine-dining offering above.</p>
+      </div>
+    `;
     return;
   }
 
   const grid = document.createElement('div');
-  grid.className = 'menu-admin-grid';
+  grid.className = 'admin-dish-grid';
 
   for (const item of menuItems) {
-    grid.appendChild(buildMenuAdminCard(item));
+    grid.appendChild(buildAdminDishCard(item));
   }
 
   wrap.innerHTML = '';
   wrap.appendChild(grid);
 }
 
-function buildMenuAdminCard(item) {
-  const card = document.createElement('div');
-  card.className = 'menu-admin-card';
+function buildAdminDishCard(item) {
+  const card = document.createElement('article');
+  card.className = 'admin-dish-card';
   card.dataset.id = item.id;
 
-  // Dish Image Thumbnail Banner
-  const imgWrap = document.createElement('div');
-  imgWrap.className = 'admin-card-img-wrap';
+  // Media
+  const media = document.createElement('div');
+  media.className = 'admin-dish-media';
   const img = document.createElement('img');
-  img.className = 'admin-card-img';
+  img.className = 'admin-dish-img';
   img.src = getMenuItemImage(item);
-  img.alt = item.name;
+  img.alt = item.name || 'Dish';
   img.loading = 'lazy';
   img.onerror = () => {
     img.onerror = null;
-    img.src = FALLBACK_SVG;
+    img.src = LUXURY_FALLBACK_SVG;
   };
-  imgWrap.appendChild(img);
+  media.appendChild(img);
 
-  const catBadge = document.createElement('span');
-  catBadge.className = 'admin-card-cat-badge';
-  catBadge.textContent = item.category || 'Special';
-  imgWrap.appendChild(catBadge);
-  card.appendChild(imgWrap);
+  const catTag = document.createElement('span');
+  catTag.className = 'admin-dish-cat-tag';
+  catTag.textContent = item.category || 'Specialty';
+  media.appendChild(catTag);
+  card.appendChild(media);
 
-  // Card Content
-  const content = document.createElement('div');
-  content.className = 'admin-card-content';
+  // Content
+  const body = document.createElement('div');
+  body.className = 'admin-dish-body';
 
   const top = document.createElement('div');
-  top.className = 'card-top';
-  const nameSpan = document.createElement('span');
-  nameSpan.className = 'card-name';
-  nameSpan.textContent = item.name;
-  const priceSpan = document.createElement('span');
-  priceSpan.className = 'card-price';
-  priceSpan.textContent = 'Rs. ' + Number(item.price).toLocaleString();
-  top.appendChild(nameSpan);
-  top.appendChild(priceSpan);
-  content.appendChild(top);
+  top.className = 'admin-dish-top';
+  const title = document.createElement('h4');
+  title.className = 'admin-dish-title';
+  title.textContent = item.name;
+  const price = document.createElement('span');
+  price.className = 'admin-dish-price';
+  price.textContent = 'Rs. ' + Number(item.price).toLocaleString();
+  top.appendChild(title);
+  top.appendChild(price);
+  body.appendChild(top);
 
   const desc = document.createElement('p');
-  desc.className = 'card-desc';
+  desc.className = 'admin-dish-desc';
   desc.textContent = item.description || 'No description provided.';
-  content.appendChild(desc);
+  body.appendChild(desc);
 
-  // Action Buttons Row
-  const row = document.createElement('div');
-  row.className = 'edit-row';
+  // Action Buttons
+  const actions = document.createElement('div');
+  actions.className = 'admin-dish-actions';
 
-  // Toggle availability
+  // Availability Toggle
   const toggleBtn = document.createElement('button');
-  toggleBtn.className = `avail-toggle ${item.available ? 'on' : 'off'}`;
+  toggleBtn.type = 'button';
+  toggleBtn.className = `admin-toggle-avail ${item.available ? 'active' : 'inactive'}`;
   toggleBtn.textContent = item.available ? 'Available' : 'Sold Out';
   toggleBtn.addEventListener('click', async () => {
     toggleBtn.disabled = true;
@@ -317,21 +392,21 @@ function buildMenuAdminCard(item) {
       if (!r.ok) throw new Error();
       item.available = newVal;
       toggleBtn.textContent = newVal ? 'Available' : 'Sold Out';
-      toggleBtn.className = `avail-toggle ${newVal ? 'on' : 'off'}`;
+      toggleBtn.className = `admin-toggle-avail ${newVal ? 'active' : 'inactive'}`;
+      updateMetrics();
     } catch {
-      alert('Could not update availability.');
+      alert('Could not update dish availability.');
     } finally {
       toggleBtn.disabled = false;
     }
   });
-  row.appendChild(toggleBtn);
+  actions.appendChild(toggleBtn);
 
-  // Edit button
+  // Edit Button
   const editBtn = document.createElement('button');
-  editBtn.className = 'btn';
+  editBtn.type = 'button';
+  editBtn.className = 'admin-btn-edit';
   editBtn.textContent = 'Edit';
-  editBtn.style.fontSize = '0.85rem';
-  editBtn.style.padding = '6px 14px';
 
   let editForm = null;
   editBtn.addEventListener('click', () => {
@@ -342,72 +417,87 @@ function buildMenuAdminCard(item) {
       return;
     }
     editBtn.textContent = 'Cancel';
-    editForm = buildEditForm(item, card, () => {
+    editForm = buildInlineEditForm(item, card, () => {
       editForm = null;
       editBtn.textContent = 'Edit';
     });
-    content.appendChild(editForm);
+    body.appendChild(editForm);
   });
-  row.appendChild(editBtn);
+  actions.appendChild(editBtn);
 
-  // Delete button
-  const deleteBtn = document.createElement('button');
-  deleteBtn.className = 'btn-delete';
-  deleteBtn.textContent = 'Delete';
-  deleteBtn.addEventListener('click', async () => {
-    if (!confirm(`Are you sure you want to remove "${item.name}" from the menu?`)) return;
-    deleteBtn.disabled = true;
+  // Delete Button
+  const delBtn = document.createElement('button');
+  delBtn.type = 'button';
+  delBtn.className = 'admin-btn-delete';
+  delBtn.textContent = 'Delete';
+  delBtn.addEventListener('click', async () => {
+    if (!confirm(`Are you certain you wish to remove "${item.name}" from the gastronomy collection?`)) return;
+    delBtn.disabled = true;
     try {
       const r = await fetch(`/api/admin/menu/${item.id}`, { method: 'DELETE' });
       if (!r.ok) throw new Error();
       menuItems = menuItems.filter((m) => m.id !== item.id);
       card.remove();
+      updateMetrics();
       if (menuItems.length === 0) renderMenuAdmin();
     } catch {
-      alert('Could not delete item. Please try again.');
-      deleteBtn.disabled = false;
+      alert('Could not delete dish. Please try again.');
+      delBtn.disabled = false;
     }
   });
-  row.appendChild(deleteBtn);
+  actions.appendChild(delBtn);
 
-  content.appendChild(row);
-  card.appendChild(content);
+  body.appendChild(actions);
+  card.appendChild(body);
   return card;
 }
 
-function buildEditForm(item, card, onDone) {
+function buildInlineEditForm(item, card, onDone) {
   const form = document.createElement('form');
-  form.className = 'edit-inline-form';
+  form.className = 'dish-inline-edit';
 
   form.innerHTML = `
-    <label style="font-size:.85rem;font-weight:600;">Name
-      <input type="text" name="name" value="${escHtml(item.name)}" required>
-    </label>
-    <label style="font-size:.85rem;font-weight:600;">Price (Rs.)
-      <input type="number" name="price" value="${item.price}" min="0" step="0.01" required>
-    </label>
-    <label class="full" style="font-size:.85rem;font-weight:600;">Category
-      <input type="text" name="category" value="${escHtml(item.category || '')}">
-    </label>
-    <label class="full" style="font-size:.85rem;font-weight:600;">Photo URL
-      <input type="url" name="image_url" value="${escHtml(item.image_url || '')}" placeholder="https://images.unsplash.com/...">
-    </label>
-    <label class="full" style="font-size:.85rem;font-weight:600;">Description
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field-group">
+        <label style="font-size:0.75rem;">Dish Name</label>
+        <input type="text" name="name" value="${escHtml(item.name)}" required>
+      </div>
+      <div class="field-group">
+        <label style="font-size:0.75rem;">Price (Rs.)</label>
+        <input type="number" name="price" value="${item.price}" min="0" step="0.01" required>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field-group">
+        <label style="font-size:0.75rem;">Category</label>
+        <input type="text" name="category" value="${escHtml(item.category || '')}">
+      </div>
+      <div class="field-group">
+        <label style="font-size:0.75rem;">Photo URL</label>
+        <input type="url" name="image_url" value="${escHtml(item.image_url || '')}" placeholder="https://…">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label style="font-size:0.75rem;">Description</label>
       <input type="text" name="description" value="${escHtml(item.description || '')}">
-    </label>
-    <div class="btn-row">
-      <button type="submit" class="btn primary" style="font-size:.85rem;padding:6px 16px;">Save Changes</button>
-      <span class="form-message" style="margin:0;font-size:0.85rem;"></span>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:6px;">
+      <button type="submit" class="btn btn-primary" style="padding:8px 18px;font-size:0.75rem;">
+        Save Changes
+      </button>
+      <span class="inline-msg" style="font-size:0.8rem;color:var(--color-text-muted);"></span>
     </div>
   `;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const btn = form.querySelector('[type=submit]');
-    const msg = form.querySelector('.form-message');
+    const btn = form.querySelector('button[type="submit"]');
+    const msg = form.querySelector('.inline-msg');
     btn.disabled = true;
-    msg.textContent = 'Saving…';
-    msg.className = 'form-message';
+    msg.textContent = 'Saving changes…';
 
     const changes = {
       name: form.name.value.trim(),
@@ -426,12 +516,13 @@ function buildEditForm(item, card, onDone) {
       if (!r.ok) throw new Error();
       const updated = await r.json();
       Object.assign(item, updated);
-      const newCard = buildMenuAdminCard(item);
+      const newCard = buildAdminDishCard(item);
       card.replaceWith(newCard);
+      updateMetrics();
       onDone();
     } catch {
-      msg.textContent = 'Could not save.';
-      msg.className = 'form-message bad';
+      msg.textContent = 'Could not update dish.';
+      msg.style.color = 'var(--color-danger)';
       btn.disabled = false;
     }
   });
@@ -439,7 +530,7 @@ function buildEditForm(item, card, onDone) {
   return form;
 }
 
-// Preset photo buttons in Add Item form
+// Preset Photo Pills in Add Dish Form
 const addImgInput = $('#new-item-image');
 const previewWrap = $('#add-item-preview-wrap');
 const previewImg = $('#add-item-preview');
@@ -458,7 +549,7 @@ if (addImgInput) {
   addImgInput.addEventListener('input', () => updateAddPreview(addImgInput.value));
 }
 
-$$('.preset-btn').forEach((btn) => {
+$$('.preset-pill').forEach((btn) => {
   btn.addEventListener('click', () => {
     const imgUrl = btn.dataset.img;
     const cat = btn.dataset.cat;
@@ -468,21 +559,22 @@ $$('.preset-btn').forEach((btn) => {
   });
 });
 
-// ---------- Add menu item form submit ----------
+// Add Dish Form Submit
 $('#add-item-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const form = e.target;
   const msg = $('#add-item-msg');
-  const btn = form.querySelector('[type=submit]');
+  const btn = form.querySelector('button[type="submit"]');
   btn.disabled = true;
-  msg.className = 'form-message';
+  btn.textContent = 'Publishing…';
+  msg.className = 'admin-alert';
   msg.style.display = 'block';
-  msg.textContent = 'Adding dish to menu…';
+  msg.textContent = 'Registering offering with atelier…';
 
   const payload = {
     name: form.name.value.trim(),
     price: Number(form.price.value),
-    category: form.category.value.trim() || 'Mains',
+    category: form.category.value.trim() || 'Lagoon Specialties',
     description: form.description.value.trim(),
     image_url: form.image_url.value.trim(),
     available: form.available.checked,
@@ -495,26 +587,27 @@ $('#add-item-form').addEventListener('submit', async (e) => {
       body: JSON.stringify(payload),
     });
     const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Failed to add item');
+    if (!r.ok) throw new Error(data.error || 'Failed to add dish to collection');
 
-    msg.className = 'form-message ok';
-    msg.textContent = `"${data.name}" added to menu successfully!`;
+    msg.className = 'admin-alert success';
+    msg.textContent = `"${data.name}" published to Gastronomy Collection.`;
     form.reset();
     form.available.checked = true;
     if (previewWrap) previewWrap.style.display = 'none';
 
-    // Add to local state & re-render
     menuItems.push(data);
     renderMenuAdmin();
+    updateMetrics();
   } catch (ex) {
-    msg.className = 'form-message bad';
+    msg.className = 'admin-alert error';
     msg.textContent = ex.message;
   } finally {
     btn.disabled = false;
+    btn.textContent = 'Publish to Gastronomy Collection';
   }
 });
 
-// ---------- Helper ----------
+// Helper
 function escHtml(str) {
   if (str == null) return '';
   return String(str)

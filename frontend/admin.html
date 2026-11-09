@@ -2,153 +2,235 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Dashboard — MiniKitchen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Hospitality Management Portal — MiniKitchen</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
-<body>
+<body class="admin-body">
 
-  <!-- Login screen -->
-  <div id="login-screen" class="login-wrap">
+  <!-- =========================================================================
+       ADMIN LOGIN SCREEN (Shown if unauthenticated)
+       ========================================================================= -->
+  <main id="login-screen" class="login-wrap">
     <div class="login-box">
-      <div class="login-logo">
-        <span style="font-size:1.6rem;margin-right:6px;">🥘</span> MiniKitchen
+      <div class="login-crest">
+        <span class="crest-icon">⚜</span>
+        <span class="crest-brand">MiniKitchen</span>
       </div>
-      <h1>Restaurant Admin</h1>
-      <p class="muted" style="margin-bottom:20px;font-size:0.92rem;">Sign in to manage table reservations and menu items.</p>
+      <h2>Executive Portal</h2>
+      <p class="login-subhead">Sign in to manage guest table reservations, daily covers, and gastronomy collection offerings.</p>
 
-      <form id="login-form" class="form" style="grid-template-columns:1fr;">
-        <label>Username
+      <form id="login-form" class="admin-form" novalidate>
+        <div class="field-group">
+          <label for="login-user">Administrator Username</label>
           <input type="text" id="login-user" autocomplete="username" placeholder="e.g. admin" required>
-        </label>
-        <label>Password
+        </div>
+        <div class="field-group">
+          <label for="login-pass">Security Key / Password</label>
           <input type="password" id="login-pass" autocomplete="current-password" placeholder="••••••••" required>
-        </label>
-        <button type="submit" class="btn primary" style="justify-self:stretch;margin-top:8px;">Sign In to Dashboard</button>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;margin-top:6px;">
+          Authenticate Access
+        </button>
       </form>
-      <p id="login-err" class="form-message bad" style="display:none;"></p>
+      <div id="login-err" class="admin-alert error" style="display:none;" role="alert"></div>
 
-      <div style="margin-top:24px;text-align:center;font-size:0.85rem;color:var(--muted);">
-        <a href="/" style="color:var(--brand);font-weight:600;">&larr; Back to Public Restaurant Site</a>
+      <div class="login-footer-link">
+        <a href="/">&larr; Return to Public Sanctuary Experience</a>
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Dashboard (hidden until logged in) -->
+  <!-- =========================================================================
+       OPERATIONAL DASHBOARD (Shown when authenticated)
+       ========================================================================= -->
   <div id="dashboard" style="display:none;">
-    <header class="nav">
-      <div class="container nav-inner">
-        <span class="logo">
-          <span style="font-size:1.4rem;">🥘</span> MiniKitchen Admin
-        </span>
-        <nav style="display:flex;align-items:center;gap:18px;">
-          <a href="#reservations">Reservations</a>
-          <a href="#menu-mgmt">Menu Management</a>
-          <a href="/" target="_blank" style="color:var(--brand);font-weight:600;font-size:.9rem;">View Site ↗</a>
-          <button id="logout-btn" class="btn secondary" style="padding:7px 18px;font-size:.85rem;">Log Out</button>
+    
+    <!-- Executive Top Bar -->
+    <header class="admin-topbar">
+      <div class="container admin-bar-inner">
+        <div class="admin-brand">
+          <span class="admin-brand-title">MiniKitchen</span>
+          <span class="admin-brand-tag">Executive Hospitality Console</span>
+        </div>
+
+        <nav class="admin-nav" aria-label="Admin Navigation">
+          <a href="#metrics" class="admin-nav-item active">Overview</a>
+          <a href="#reservations" class="admin-nav-item">Guest Ledger</a>
+          <a href="#menu-mgmt" class="admin-nav-item">Gastronomy Management</a>
+          <a href="/" target="_blank" class="admin-nav-external" title="Open public sanctuary in new tab">View Sanctuary ↗</a>
+          <button id="logout-btn" class="btn-logout" aria-label="Sign out of console">Sign Out</button>
         </nav>
       </div>
     </header>
 
-    <!-- Reservations section -->
-    <section id="reservations" class="section">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <span class="section-tag">Booking Requests</span>
-            <h2>Reservations</h2>
+    <div class="container admin-main-content">
+      
+      <!-- =====================================================================
+           HOSPITALITY OPERATIONAL METRICS OVERVIEW
+           ===================================================================== -->
+      <section id="metrics" class="admin-metrics-section">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Total Reservations</span>
+            <span class="metric-value" id="metric-total">0</span>
+            <span class="metric-sub">All recorded dining requests</span>
           </div>
-          <div class="filter-row">
-            <label>Filter by status:
-              <select id="status-filter">
-                <option value="">All Reservations</option>
-                <option value="Pending">Pending Only</option>
-                <option value="Confirmed">Confirmed Only</option>
-                <option value="Cancelled">Cancelled Only</option>
-              </select>
-            </label>
+          <div class="metric-card highlight-pending">
+            <span class="metric-label">Pending Reviews</span>
+            <span class="metric-value" id="metric-pending">0</span>
+            <span class="metric-sub">Action required &bull; Awaiting confirmation</span>
+          </div>
+          <div class="metric-card highlight-confirmed">
+            <span class="metric-label">Confirmed Bookings</span>
+            <span class="metric-value" id="metric-confirmed">0</span>
+            <span class="metric-sub">Verified guest reservations</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Today's Covers</span>
+            <span class="metric-value" id="metric-today">0</span>
+            <span class="metric-sub" id="metric-today-date">Scheduled for today</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Gastronomy Dishes</span>
+            <span class="metric-value" id="metric-menu">0</span>
+            <span class="metric-sub" id="metric-menu-avail">Active offerings</span>
           </div>
         </div>
-        <div id="reservations-table-wrap">
-          <p class="muted">Loading reservations…</p>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Menu management section -->
-    <section id="menu-mgmt" class="section alt">
-      <div class="container">
-        <div class="section-head">
+      <!-- =====================================================================
+           GUEST RESERVATION LEDGER
+           ===================================================================== -->
+      <section id="reservations" class="admin-section">
+        <div class="section-title-bar">
           <div>
-            <span class="section-tag">Dishes &amp; Offerings</span>
-            <h2>Menu Management</h2>
+            <span class="admin-eyebrow">Guest Ledger</span>
+            <h2>Table Reservation Requests</h2>
           </div>
         </div>
 
-        <!-- Add item card -->
-        <div class="admin-card">
-          <h3>➕ Add New Menu Item</h3>
-          <form id="add-item-form" class="form">
-            <div class="form-grid-2">
-              <label>Dish Name
+        <!-- Filter & Search Controls Bar -->
+        <div class="admin-filter-bar">
+          <div class="filter-group-search">
+            <label for="search-input" class="sr-only">Search Guests</label>
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Search by guest name or contact info…"
+              autocomplete="off"
+            >
+          </div>
+
+          <div class="filter-group-date">
+            <label for="date-filter">Date:</label>
+            <input type="date" id="date-filter">
+          </div>
+
+          <div class="filter-group-status">
+            <label for="status-filter">Status:</label>
+            <select id="status-filter">
+              <option value="">All Statuses</option>
+              <option value="Pending">Pending Only</option>
+              <option value="Confirmed">Confirmed Only</option>
+              <option value="Cancelled">Cancelled Only</option>
+            </select>
+          </div>
+
+          <button id="reset-filters-btn" class="btn-filter-reset">Reset</button>
+        </div>
+
+        <!-- Reservations Table Container -->
+        <div id="reservations-table-wrap" class="table-responsive" role="region" aria-label="Reservations Ledger">
+          <p class="muted">Loading guest reservations…</p>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           GASTRONOMY MENU MANAGEMENT
+           ===================================================================== -->
+      <section id="menu-mgmt" class="admin-section">
+        <div class="section-title-bar">
+          <div>
+            <span class="admin-eyebrow">Atelier Offerings</span>
+            <h2>Gastronomy Collection Management</h2>
+          </div>
+        </div>
+
+        <!-- Add Dish Form Card -->
+        <div class="admin-suite-card">
+          <h3 class="suite-card-title">Add Offering to Collection</h3>
+          <form id="add-item-form" class="admin-form" novalidate>
+            <div class="admin-form-row">
+              <div class="field-group">
+                <label for="new-item-name">Dish Name *</label>
                 <input type="text" name="name" id="new-item-name" placeholder="e.g. Negombo Lagoon Crab Curry" required>
-              </label>
-              <label>Price (Rs.)
-                <input type="number" name="price" min="0" step="0.01" placeholder="e.g. 2400" required>
-              </label>
+              </div>
+              <div class="field-group">
+                <label for="new-item-price">Price in LKR (Rs.) *</label>
+                <input type="number" name="price" id="new-item-price" min="0" step="0.01" placeholder="e.g. 2800" required>
+              </div>
             </div>
 
-            <div class="form-grid-2">
-              <label>Category
-                <input type="text" name="category" id="new-item-category" placeholder="e.g. Seafood, Mains, Kottu, Curries, Desserts">
-              </label>
-              <label>Photo URL (Optional)
-                <input type="url" name="image_url" id="new-item-image" placeholder="https://images.unsplash.com/...">
-              </label>
+            <div class="admin-form-row">
+              <div class="field-group">
+                <label for="new-item-category">Category *</label>
+                <input type="text" name="category" id="new-item-category" placeholder="e.g. Lagoon &amp; Seafood, Curries, Kottu, Confections" required>
+              </div>
+              <div class="field-group">
+                <label for="new-item-image">Photo URL (Optional)</label>
+                <input type="url" name="image_url" id="new-item-image" placeholder="https://images.unsplash.com/…">
+              </div>
             </div>
 
-            <!-- Preset Buttons -->
-            <div class="preset-row">
-              <span class="preset-label">Quick Photo Presets:</span>
-              <div class="preset-chips">
-                <button type="button" class="preset-btn" data-cat="Seafood" data-img="https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=700&q=85">🦀 Lagoon Crab</button>
-                <button type="button" class="preset-btn" data-cat="Kottu" data-img="https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=700&q=85">🍗 Chicken Kottu</button>
-                <button type="button" class="preset-btn" data-cat="Curries" data-img="https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=700&q=85">🍛 Fish Curry</button>
-                <button type="button" class="preset-btn" data-cat="Mains" data-img="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=700&q=85">🍚 Rice &amp; Biryani</button>
-                <button type="button" class="preset-btn" data-cat="Seafood" data-img="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=700&q=85">🦑 Hot Butter Cuttlefish</button>
-                <button type="button" class="preset-btn" data-cat="Starters" data-img="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=700&q=85">🥞 Egg Hoppers / Roti</button>
-                <button type="button" class="preset-btn" data-cat="Beverages" data-img="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=700&q=85">🍹 Lime Soda &amp; Juice</button>
-                <button type="button" class="preset-btn" data-cat="Desserts" data-img="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=700&q=85">🍮 Watalappam / Pudding</button>
+            <!-- Curated Photo Presets -->
+            <div class="preset-box">
+              <span class="preset-title">Curated Photo Presets:</span>
+              <div class="preset-pills">
+                <button type="button" class="preset-pill" data-cat="Lagoon &amp; Seafood" data-img="https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=900&q=88">🦀 Lagoon Crab</button>
+                <button type="button" class="preset-pill" data-cat="Artisanal Kottu" data-img="https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=900&q=88">🍗 Chicken Kottu</button>
+                <button type="button" class="preset-pill" data-cat="Clay-Pot Curries" data-img="https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=900&q=88">🍛 Clay-Pot Curry</button>
+                <button type="button" class="preset-pill" data-cat="Heritage Mains" data-img="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=900&q=88">🍚 Saffron Rice &amp; Biryani</button>
+                <button type="button" class="preset-pill" data-cat="Lagoon &amp; Seafood" data-img="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=900&q=88">🦑 Hot Butter Cuttlefish</button>
+                <button type="button" class="preset-pill" data-cat="Confections" data-img="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=900&q=88">🍮 Watalappam Confection</button>
+                <button type="button" class="preset-pill" data-cat="Elixirs &amp; Juices" data-img="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=88">🍹 Coastal Lime Elixir</button>
               </div>
             </div>
 
             <!-- Image Live Preview -->
-            <div id="add-item-preview-wrap" class="image-preview-wrap" style="display:none;">
-              <span class="preview-title">Photo Preview:</span>
-              <img id="add-item-preview" src="" alt="Photo preview" class="admin-preview-img">
+            <div id="add-item-preview-wrap" class="admin-preview-stage" style="display:none;">
+              <span class="preview-stage-label">Photo Preview:</span>
+              <img id="add-item-preview" src="" alt="Dish preview" class="admin-preview-img">
             </div>
 
-            <label>Description
-              <input type="text" name="description" placeholder="Fresh lagoon crab cooked in rich Negombo coconut spices.">
-            </label>
+            <div class="field-group">
+              <label for="new-item-desc">Culinary Description</label>
+              <input type="text" name="description" id="new-item-desc" placeholder="Simmered gently in roasted Jaffna curry spices, sweet coconut cream, and lemongrass.">
+            </div>
 
-            <label class="checkbox-label">
-              <input type="checkbox" name="available" checked> Available to order immediately
-            </label>
+            <div class="field-group checkbox-row">
+              <input type="checkbox" name="available" id="new-item-avail" checked>
+              <label for="new-item-avail">Available immediately on public gastronomy menu</label>
+            </div>
 
-            <button type="submit" class="btn primary" style="align-self:flex-start;">Add Dish to Menu</button>
+            <button type="submit" class="btn btn-primary" style="align-self:flex-start;padding:12px 28px;">
+              Publish to Gastronomy Collection
+            </button>
           </form>
-          <p id="add-item-msg" class="form-message"></p>
+          <div id="add-item-msg" class="admin-alert" style="display:none;" role="alert"></div>
         </div>
 
-        <!-- Current items list -->
-        <h3 style="margin-bottom:16px;">Current Menu Items</h3>
-        <div id="menu-admin-list">
-          <p class="muted">Loading menu…</p>
+        <!-- Collection Management Grid -->
+        <h3 class="collection-heading">Published Gastronomy Offerings</h3>
+        <div id="menu-admin-list" class="admin-dish-grid">
+          <p class="muted">Loading gastronomy collection…</p>
         </div>
-      </div>
-    </section>
+      </section>
+
+    </div>
   </div>
 
   <script src="admin.js"></script>
