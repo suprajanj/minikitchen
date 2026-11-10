@@ -399,6 +399,18 @@
   color: var(--color-text-light);
 }
 
+.seating-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(197, 168, 128, 0.15);
+  color: var(--color-primary);
+  border: 1px solid rgba(197, 168, 128, 0.35);
+  white-space: nowrap;
+}
+
 .status-pill {
   display: inline-block;
   font-size: 0.74rem;

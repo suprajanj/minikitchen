@@ -205,6 +205,7 @@ function renderReservations() {
         <th>Date</th>
         <th>Time</th>
         <th>Covers</th>
+        <th>Seating Preference</th>
         <th>Channel</th>
         <th>Status</th>
         <th>Review Action</th>
@@ -218,14 +219,16 @@ function renderReservations() {
     const tr = document.createElement('tr');
     const dateStr = res.date ? res.date : '—';
     const timeStr = res.time ? res.time.slice(0, 5) : '—';
+    const shortId = String(res.id || '').length > 10 ? String(res.id).slice(0, 8) + '…' : String(res.id);
 
     tr.innerHTML = `
-      <td><span style="font-family:monospace;font-weight:700;color:var(--color-gold-dark);">#${res.id}</span></td>
+      <td><span style="font-family:monospace;font-weight:700;color:var(--color-gold-dark);" title="${escHtml(String(res.id))}">${escHtml(shortId)}</span></td>
       <td><strong>${escHtml(res.name)}</strong></td>
       <td>${escHtml(res.contact)}</td>
       <td>${escHtml(dateStr)}</td>
       <td>${escHtml(timeStr)}</td>
       <td><strong>${res.guests}</strong></td>
+      <td><span class="seating-tag">${escHtml(res.seating || 'Standard / Veranda')}</span></td>
       <td><span class="source-tag">${escHtml(res.source || 'web')}</span></td>
       <td><span class="status-pill ${escHtml(res.status)}">${escHtml(res.status)}</span></td>
       <td></td>

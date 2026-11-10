@@ -323,6 +323,8 @@ if (reservationForm) {
     }
 
     try {
+      const seating = (data.seating || 'Ocean Breeze Veranda').trim();
+
       const res = await fetch('/api/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -332,7 +334,7 @@ if (reservationForm) {
           date,
           time,
           guests,
-          seating: data.seating || 'veranda'
+          seating
         }),
       });
 
@@ -346,7 +348,7 @@ if (reservationForm) {
         msg.style.display = 'block';
         msg.innerHTML = `
           <strong class="font-serif" style="font-size:1.3rem;display:block;margin-bottom:6px;">✦ Reservation Request Received</strong>
-          Thank you, <strong>${name}</strong>. Your request for a table of <strong>${guests} ${guests === 1 ? 'guest' : 'guests'}</strong> on <strong>${date}</strong> at <strong>${time}</strong> has been registered with <strong>PENDING</strong> status.<br><br>
+          Thank you, <strong>${name}</strong>. Your request for a table of <strong>${guests} ${guests === 1 ? 'guest' : 'guests'}</strong> (<em>${seating}</em>) on <strong>${date}</strong> at <strong>${time}</strong> has been registered with <strong>PENDING</strong> status.<br><br>
           Our maître d' will review seating availability and contact you directly at <strong>${contact}</strong> to confirm your reservation.
         `;
         msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

@@ -61,16 +61,20 @@ ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 -- 2. Table Reservations
 CREATE TABLE IF NOT EXISTS reservations (
-  id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  id         UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name       TEXT NOT NULL,
   contact    TEXT NOT NULL,
   date       DATE NOT NULL,
-  time       TIME NOT NULL,
-  guests     INT NOT NULL,
-  status     TEXT DEFAULT 'Pending',
+  time       TEXT NOT NULL,
+  guests     INT NOT NULL CHECK (guests >= 1 AND guests <= 20),
+  seating    TEXT DEFAULT 'Ocean Breeze Veranda',
+  status     TEXT NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'Confirmed', 'Cancelled')),
   source     TEXT DEFAULT 'web',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure seating column is present on existing tables
+ALTER TABLE reservations ADD COLUMN IF NOT EXISTS seating TEXT DEFAULT 'Ocean Breeze Veranda';
 
 -- Optional: Seed initial fine-dining dishes
 INSERT INTO menu_items (name, description, price, category, available, image_url) VALUES

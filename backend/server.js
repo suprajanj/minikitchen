@@ -78,12 +78,13 @@ function chatbotOnly(req, res, next) {
 
 // Status is ALWAYS Pending when created. Nobody can create a Confirmed booking.
 async function createReservation(body, source) {
-  const { name, contact, date, time, guests } = body;
+  const { name, contact, date, time, guests, seating } = body;
   const g = Number(guests);
   const cleanName = typeof name === 'string' ? name.trim() : '';
   const cleanContact = typeof contact === 'string' ? contact.trim() : '';
   const cleanDate = typeof date === 'string' ? date.trim() : '';
   const cleanTime = typeof time === 'string' ? time.trim() : '';
+  const cleanSeating = typeof seating === 'string' && seating.trim() ? seating.trim() : 'Ocean Breeze Veranda';
 
   if (!cleanName || !cleanContact || !cleanDate || !cleanTime || !Number.isInteger(g) || g < 1 || g > 20) {
     throw new Error('Please fill in all fields correctly (1 to 20 guests permitted).');
@@ -96,6 +97,7 @@ async function createReservation(body, source) {
     time: cleanTime,
     guests: g,
     status: 'Pending',
+    seating: cleanSeating,
   };
   if (source) {
     payload.source = source;
@@ -106,6 +108,17 @@ async function createReservation(body, source) {
     .insert(payload)
     .select()
     .single();
+
+  // If seating column is missing in Supabase, retry without seating column
+  if (result.error && payload.seating) {
+    console.warn('[reservation] Insert with seating failed, retrying without seating column:', result.error.message);
+    delete payload.seating;
+    result = await supabase
+      .from('reservations')
+      .insert(payload)
+      .select()
+      .single();
+  }
 
   // If source column is missing in Supabase, retry without source column
   if (result.error && payload.source) {
