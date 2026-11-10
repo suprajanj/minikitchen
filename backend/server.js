@@ -80,16 +80,50 @@ function chatbotOnly(req, res, next) {
 async function createReservation(body, source) {
   const { name, contact, date, time, guests } = body;
   const g = Number(guests);
-  if (!name || !contact || !date || !time || !Number.isInteger(g) || g < 1 || g > 20) {
-    throw new Error('invalid');
+  const cleanName = typeof name === 'string' ? name.trim() : '';
+  const cleanContact = typeof contact === 'string' ? contact.trim() : '';
+  const cleanDate = typeof date === 'string' ? date.trim() : '';
+  const cleanTime = typeof time === 'string' ? time.trim() : '';
+
+  if (!cleanName || !cleanContact || !cleanDate || !cleanTime || !Number.isInteger(g) || g < 1 || g > 20) {
+    throw new Error('Please fill in all fields correctly (1 to 20 guests permitted).');
   }
-  const { data, error } = await supabase
+
+  const payload = {
+    name: cleanName,
+    contact: cleanContact,
+    date: cleanDate,
+    time: cleanTime,
+    guests: g,
+    status: 'Pending',
+  };
+  if (source) {
+    payload.source = source;
+  }
+
+  let result = await supabase
     .from('reservations')
-    .insert({ name, contact, date, time, guests: g, status: 'Pending', source })
+    .insert(payload)
     .select()
     .single();
-  if (error) throw error;
-  return data;
+
+  // If source column is missing in Supabase, retry without source column
+  if (result.error && payload.source) {
+    console.warn('[reservation] Insert with source failed, retrying without source column:', result.error.message);
+    delete payload.source;
+    result = await supabase
+      .from('reservations')
+      .insert(payload)
+      .select()
+      .single();
+  }
+
+  if (result.error) {
+    console.error('[reservation] Supabase insert error:', result.error);
+    throw new Error(result.error.message || 'Could not save reservation');
+  }
+
+  return result.data;
 }
 
 // ---------- Public API ----------
@@ -125,8 +159,9 @@ app.post('/api/reservations', async (req, res) => {
   try {
     const r = await createReservation(req.body, 'web');
     res.status(201).json({ ok: true, id: r.id, status: r.status });
-  } catch {
-    res.status(400).json({ error: 'Please fill in all fields correctly.' });
+  } catch (err) {
+    console.error('[reservations] Error creating reservation:', err);
+    res.status(400).json({ error: err.message || 'Please fill in all fields correctly.' });
   }
 });
 

@@ -292,46 +292,87 @@ if (reservationForm) {
     const form = e.target;
     const msg = $('#form-message');
     const button = form.querySelector('button[type="submit"]');
-    const data = Object.fromEntries(new FormData(form).entries());
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-    // Basic Validation
-    if (!data.name || !data.contact || !data.date || !data.time || !data.guests) {
-      msg.className = 'reservation-feedback error';
-      msg.textContent = 'Please provide all required fields to submit your reservation request.';
+    const name = (data.name || '').trim();
+    const contact = (data.contact || '').trim();
+    const date = (data.date || '').trim();
+    const time = (data.time || '').trim();
+    const guests = parseInt(data.guests, 10);
+
+    // Validation with instant feedback
+    if (!name || !contact || !date || !time || isNaN(guests) || guests < 1 || guests > 20) {
+      if (msg) {
+        msg.className = 'reservation-feedback error';
+        msg.style.display = 'block';
+        msg.textContent = 'Please fill in all required fields (1 to 20 guests permitted).';
+        msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
       return;
     }
 
-    button.disabled = true;
-    button.textContent = 'Submitting Request…';
-    msg.className = 'reservation-feedback';
-    msg.style.display = 'none';
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Submitting Request…';
+    }
+    if (msg) {
+      msg.className = 'reservation-feedback';
+      msg.style.display = 'none';
+      msg.innerHTML = '';
+    }
 
     try {
       const res = await fetch('/api/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          name,
+          contact,
+          date,
+          time,
+          guests,
+          seating: data.seating || 'veranda'
+        }),
       });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Unable to submit reservation request');
 
-      msg.className = 'reservation-feedback success';
-      msg.innerHTML = `
-        <strong class="font-serif" style="font-size:1.3rem;display:block;margin-bottom:6px;">✦ Reservation Request Received</strong>
-        Thank you, <strong>${data.name}</strong>. Your request for a table of <strong>${data.guests} guests</strong> on <strong>${data.date}</strong> at <strong>${data.time}</strong> has been registered with <strong>PENDING</strong> status.<br><br>
-        Our maître d' will review seating availability and contact you directly at <strong>${data.contact}</strong> to confirm your reservation.
-      `;
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.error || 'Unable to submit reservation request');
+      }
+
+      if (msg) {
+        msg.className = 'reservation-feedback success';
+        msg.style.display = 'block';
+        msg.innerHTML = `
+          <strong class="font-serif" style="font-size:1.3rem;display:block;margin-bottom:6px;">✦ Reservation Request Received</strong>
+          Thank you, <strong>${name}</strong>. Your request for a table of <strong>${guests} ${guests === 1 ? 'guest' : 'guests'}</strong> on <strong>${date}</strong> at <strong>${time}</strong> has been registered with <strong>PENDING</strong> status.<br><br>
+          Our maître d' will review seating availability and contact you directly at <strong>${contact}</strong> to confirm your reservation.
+        `;
+        msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
       form.reset();
       if (dateInput) {
         const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
         dateInput.value = today;
       }
+      const timeInput = $('#time-input');
+      if (timeInput) timeInput.value = '19:30';
+      const guestInput = $('#guest-count');
+      if (guestInput) guestInput.value = '2';
     } catch (err) {
-      msg.className = 'reservation-feedback error';
-      msg.textContent = err.message || 'We could not submit your request. Please call our guest line directly.';
+      if (msg) {
+        msg.className = 'reservation-feedback error';
+        msg.style.display = 'block';
+        msg.textContent = err.message || 'We could not submit your request. Please call our guest line directly.';
+        msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     } finally {
-      button.disabled = false;
-      button.textContent = 'Submit Reservation Request';
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Submit Reservation Request';
+      }
     }
   });
 }

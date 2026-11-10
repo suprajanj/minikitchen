@@ -999,15 +999,16 @@ p {
   padding: 18px;
   border-radius: var(--radius-sm);
   display: none;
+  animation: fadeIn 0.3s ease;
 }
 .reservation-feedback.success {
-  display: block;
+  display: block !important;
   background-color: var(--color-success-bg);
   color: var(--color-success);
   border: 1px solid rgba(40, 94, 67, 0.3);
 }
 .reservation-feedback.error {
-  display: block;
+  display: block !important;
   background-color: var(--color-danger-bg);
   color: var(--color-danger);
   border: 1px solid rgba(138, 43, 43, 0.3);
